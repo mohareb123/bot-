@@ -152,7 +152,7 @@ export function registerAIHandlers(bot: Telegraf<BotContext>): void {
     const processingMsgId = await sendProcessing(ctx, '🤖 جاري التفكير...');
 
     try {
-      const history = getUserHistory(userId);
+      const history = [...getUserHistory(userId)];
       addToHistory(userId, 'user', text);
 
       const response = await aiManager.chat(text, history);

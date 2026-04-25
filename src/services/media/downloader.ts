@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
@@ -7,7 +7,7 @@ import { config } from '../../config';
 import { logger } from '../../utils/logger';
 import { generateTempPath, detectPlatform } from '../../utils/helpers';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export interface DownloadResult {
   filePath: string;
@@ -84,12 +84,13 @@ async function downloadWithCobalt(url: string): Promise<DownloadResult> {
 
 async function downloadWithYtDlp(url: string): Promise<DownloadResult> {
   const filePath = generateTempPath('mp4');
-  const cookiesArg = config.googleCookiesPath ? `--cookies "${config.googleCookiesPath}"` : '';
-
-  const cmd = `yt-dlp ${cookiesArg} -f "best[filesize<50M]/best" --no-playlist --max-filesize 50M -o "${filePath}" "${url}" 2>&1`;
+  const args = ['-f', 'best[filesize<50M]/best', '--no-playlist', '--max-filesize', '50M', '-o', filePath, url];
+  if (config.googleCookiesPath) {
+    args.unshift('--cookies', config.googleCookiesPath);
+  }
 
   try {
-    const { stdout } = await execAsync(cmd, { timeout: 120000 });
+    const { stdout } = await execFileAsync('yt-dlp', args, { timeout: 120000 });
     logger.debug('yt-dlp output:', stdout);
 
     if (!fs.existsSync(filePath)) {

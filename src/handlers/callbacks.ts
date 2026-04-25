@@ -121,6 +121,10 @@ export function registerCallbackHandlers(bot: Telegraf<BotContext>): void {
   bot.action(/set_voice_(.+)/, async (ctx) => {
     const voiceId = ctx.match[1];
     const voice = AVAILABLE_VOICES.find(v => v.id === voiceId);
+    if (!voice) {
+      await ctx.answerCbQuery('❌ صوت غير صالح');
+      return;
+    }
 
     await User.findOneAndUpdate(
       { telegramId: ctx.from?.id },

@@ -464,7 +464,7 @@ async function showPluginsList(ctx: BotContext): Promise<void> {
 
 async function showStats(ctx: BotContext): Promise<void> {
   const now = new Date();
-  const today = new Date(now.setHours(0, 0, 0, 0));
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const week = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   const [totalUsers, newToday, activeWeek, totalGroups, totalLogs, todayLogs] = await Promise.all([

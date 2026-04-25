@@ -1,11 +1,11 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import axios from 'axios';
 import { logger } from '../../utils/logger';
 import { generateTempPath } from '../../utils/helpers';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export interface TTSVoice {
   id: string;
@@ -47,11 +47,11 @@ export async function textToSpeech(text: string, voiceId = 'ar-EG-ShakirNeural')
 
 async function ttsWithEdgeTTS(text: string, voiceId: string): Promise<string> {
   const outputPath = generateTempPath('mp3');
-  const escapedText = text.replace(/"/g, '\\"').replace(/'/g, "\\'");
 
   try {
-    await execAsync(
-      `edge-tts --voice "${voiceId}" --text "${escapedText}" --write-media "${outputPath}"`,
+    await execFileAsync(
+      'edge-tts',
+      ['--voice', voiceId, '--text', text, '--write-media', outputPath],
       { timeout: 60000 }
     );
 
