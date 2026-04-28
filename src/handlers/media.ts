@@ -108,15 +108,18 @@ async function handleDownload(ctx: BotContext, url: string): Promise<void> {
 
 async function handleMp3Download(ctx: BotContext, url: string): Promise<void> {
   const processingMsgId = await sendProcessing(ctx, '🎵 جاري التحميل والتحويل لـ MP3...');
+  const tempFiles: string[] = [];
 
   try {
     const videoResult = await downloadMedia(url);
+    tempFiles.push(videoResult.filePath);
 
     if (processingMsgId) {
       await editMessage(ctx, processingMsgId, '🎵 جاري تحويل الفيديو إلى MP3...');
     }
 
     const mp3Result = await convertToMp3(videoResult.filePath);
+    tempFiles.push(mp3Result.filePath);
     const fileSize = formatFileSize(mp3Result.fileSize);
 
     if (processingMsgId) await deleteMessage(ctx, processingMsgId);
@@ -130,13 +133,14 @@ async function handleMp3Download(ctx: BotContext, url: string): Promise<void> {
     );
 
     await sendSuccessVideo(ctx);
-
-    if (fs.existsSync(videoResult.filePath)) fs.unlinkSync(videoResult.filePath);
-    if (fs.existsSync(mp3Result.filePath)) fs.unlinkSync(mp3Result.filePath);
   } catch (err) {
     logger.error('MP3 conversion error:', err);
     if (processingMsgId) {
       await editMessage(ctx, processingMsgId, '❌ فشل تحويل الفيديو إلى MP3.');
+    }
+  } finally {
+    for (const f of tempFiles) {
+      try { if (fs.existsSync(f)) fs.unlinkSync(f); } catch { /* best-effort */ }
     }
   }
 }

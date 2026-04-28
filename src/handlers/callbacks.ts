@@ -185,7 +185,8 @@ export function registerCallbackHandlers(bot: Telegraf<BotContext>): void {
             break;
           }
         } catch {
-          // skip
+          allSubscribed = false;
+          break;
         }
       }
 

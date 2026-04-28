@@ -37,6 +37,7 @@ export async function subscriptionMiddleware(ctx: BotContext, next: () => Promis
         }
       } catch (err) {
         logger.debug(`Cannot check subscription for @${channelUsername}:`, err);
+        notSubscribed.push({ username: channelUsername, title: channelUsername });
       }
     }
 
