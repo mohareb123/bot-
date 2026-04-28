@@ -21,15 +21,15 @@ export async function authMiddleware(ctx: BotContext, next: () => Promise<void>)
       });
       logger.info(`New user registered: ${telegramId} (@${ctx.from.username})`);
     } else {
+      if (user.role === 'banned') {
+        return;
+      }
+
       user.lastActive = new Date();
       user.username = ctx.from.username || user.username;
       user.firstName = ctx.from.first_name || user.firstName;
       user.totalRequests += 1;
       await user.save();
-    }
-
-    if (user.role === 'banned') {
-      return;
     }
 
     ctx.isAdmin = user.role === 'admin' || user.role === 'superadmin';

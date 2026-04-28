@@ -153,11 +153,11 @@ export function registerAIHandlers(bot: Telegraf<BotContext>): void {
 
     try {
       const history = [...getUserHistory(userId)];
-      addToHistory(userId, 'user', text);
 
       const response = await aiManager.chat(text, history);
       const truncated = truncateText(response);
 
+      addToHistory(userId, 'user', text);
       addToHistory(userId, 'assistant', response);
 
       if (processingMsgId) {

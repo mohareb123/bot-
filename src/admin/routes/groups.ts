@@ -27,9 +27,22 @@ groupRoutes.get('/:chatId', async (req, res) => {
 
 groupRoutes.patch('/:chatId', async (req, res) => {
   try {
+    const allowedFields: Record<string, unknown> = {};
+    const { title, isActive, settings } = req.body;
+    if (title !== undefined) allowedFields.title = title;
+    if (isActive !== undefined) allowedFields.isActive = isActive;
+    if (settings) {
+      const safe = ['aiEnabled', 'mediaEnabled', 'voiceEnabled', 'welcomeMessage', 'language'] as const;
+      for (const key of safe) {
+        if (settings[key] !== undefined) {
+          allowedFields[`settings.${key}`] = settings[key];
+        }
+      }
+    }
+
     const group = await Group.findOneAndUpdate(
       { chatId: parseInt(req.params.chatId) },
-      req.body,
+      { $set: allowedFields },
       { new: true }
     );
     if (!group) {
